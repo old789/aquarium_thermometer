@@ -10,15 +10,18 @@ const int LCD_ROWS = 2;
 
 void setup() {
   int status;
-  
+
+  Serial.begin(115200);
+  delay(100);  
   status=lcd.begin(LCD_COLS, LCD_ROWS);
   if(status){
-    hd44780::fatalError(status);
+    Serial.printf("LCD initialise failed, status = %d\r\n", status);
+    while(true){ delay(100); }
   }
   lcd.clear();
-  lcd.print("Hello, World!");
+  lcd.print("Line 1");
   lcd.setCursor(0,1);
-  lcd.print("Hello, World!");
+  lcd.print("Line 2");
 }
 
 void loop() {}
