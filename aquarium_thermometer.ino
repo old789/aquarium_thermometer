@@ -21,7 +21,8 @@ const int LCD_ROWS = 2;
 double t1, t2;
 bool enable_cli = false;
 unsigned int roll_cnt=0;
-char roller[] = { '-', '/', '|', '\\' };
+// char roller[] = { '|', '/', '-', '\\' };
+char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
 
 void read_themperatures();
 void roll_roller();
