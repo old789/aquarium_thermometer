@@ -4,6 +4,7 @@
 #include <hd44780ioClass/hd44780_I2Cexp.h>
 #include <DS18B20.h>  // https://github.com/RobTillaart/DS18B20_RT
 #include "TickTwo.h"  // https://github.com/sstaub/TickTwo
+#include <ESP8266WiFi.h>
 
 hd44780_I2Cexp lcd;
 
@@ -23,6 +24,13 @@ bool enable_cli = false;
 unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
 char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
+bool wifi_is_ok = false;
+
+#include "config.h"
+
+WiFiEventHandler on_wifi_connect_handler;
+WiFiEventHandler on_wifi_got_IP_handler;
+WiFiEventHandler on_wifi_disconnect_handler;
 
 void read_themperatures();
 void roll_roller();
@@ -87,7 +95,11 @@ void setup() {
 
   ds1.requestTemperatures();
   ds2.requestTemperatures();
-  delay(10000);
+  on_wifi_connect_handler = WiFi.onStationModeConnected(on_wifi_connect);
+  on_wifi_got_IP_handler = WiFi.onStationModeGotIP(on_wifi_got_IP);
+  on_wifi_disconnect_handler = WiFi.onStationModeDisconnected(on_wifi_disconnect);
+  wifi_init();
+  delay(2000);
   timer1.start();
   timer2.start();
   //timer3.start();
