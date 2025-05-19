@@ -5,6 +5,8 @@
 #include <DS18B20.h>  // https://github.com/RobTillaart/DS18B20_RT
 #include "TickTwo.h"  // https://github.com/sstaub/TickTwo
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#include <mDNSResolver.h>
 
 hd44780_I2Cexp lcd;
 
@@ -34,9 +36,11 @@ WiFiEventHandler on_wifi_disconnect_handler;
 
 void read_themperatures();
 void roll_roller();
+void report();
 
 TickTwo timer1( read_themperatures, 10000);
 TickTwo timer2( roll_roller, 700);
+TickTwo timer3( report, 60000);
 
 void setup() {
   int status;
@@ -102,9 +106,11 @@ void setup() {
   delay(2000);
   timer1.start();
   timer2.start();
-  //timer3.start();
+  timer3.start();
   //timer4.start();
   lcd.clear();
+  //IPAddress ip = resolver.search("cub.local");
+  
 }
 
 void loop() {
@@ -118,7 +124,7 @@ void loop() {
 void loop_usual_mode() {
   timer1.update();
   timer2.update();
-//  timer3.update();
+  timer3.update();
 //  timer4.update();
 //  if ( standalone == 0 ) {
 //    timer5.update();
@@ -152,4 +158,8 @@ void roll_roller(){
   lcd.setCursor(15,0);
   lcd.print(roller[roll_cnt++]);
   if ( roll_cnt >= sizeof(roller) ) roll_cnt=0;
+}
+
+void report(){
+  MDNS.update();
 }
