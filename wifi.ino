@@ -23,6 +23,7 @@ void on_wifi_got_IP(const WiFiEventStationModeGotIP& event) {
     Serial.println("Error starting mDNS");
   }else{
     Serial.println("mDNS started");
+    MDNS.addService("esp", "tcp", 8080);  // Announce esp tcp service on port 8080
   }
 }
 

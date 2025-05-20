@@ -6,7 +6,6 @@
 #include "TickTwo.h"  // https://github.com/sstaub/TickTwo
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#include <mDNSResolver.h>
 
 hd44780_I2Cexp lcd;
 
@@ -109,7 +108,6 @@ void setup() {
   timer3.start();
   //timer4.start();
   lcd.clear();
-  //IPAddress ip = resolver.search("cub.local");
   
 }
 
@@ -129,6 +127,9 @@ void loop_usual_mode() {
 //  if ( standalone == 0 ) {
 //    timer5.update();
 //  }
+  if (wifi_is_ok) {
+    MDNS.update();
+  }
 }
 
 void read_themperatures(){
@@ -161,5 +162,25 @@ void roll_roller(){
 }
 
 void report(){
-  MDNS.update();
+  Serial.println("Sending mDNS query");
+  int n = MDNS.queryService("mqtt", "tcp");  // Send out query for esp tcp services
+  Serial.println("mDNS query done");
+  if (n == 0) {
+    Serial.println("no services found");
+  } else {
+    Serial.print(n);
+    Serial.println(" service(s) found");
+    for (int i = 0; i < n; ++i) {
+      // Print details for each service found
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(MDNS.hostname(i));
+      Serial.print(" (");
+      Serial.print(MDNS.IP(i));
+      Serial.print(":");
+      Serial.print(MDNS.port(i));
+      Serial.println(")");
+    }
+  }
+  Serial.println();
 }
