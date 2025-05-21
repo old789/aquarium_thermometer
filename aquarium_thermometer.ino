@@ -26,6 +26,10 @@ unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
 char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
 bool wifi_is_ok = false;
+IPAddress mqtt_host_ip;
+uint16_t mqtt_port=1883;
+IPAddress syslog_host_ip;
+uint16_t syslog_port=514;
 
 #include "config.h"
 
@@ -127,9 +131,6 @@ void loop_usual_mode() {
 //  if ( standalone == 0 ) {
 //    timer5.update();
 //  }
-  if (wifi_is_ok) {
-    MDNS.update();
-  }
 }
 
 void read_themperatures(){
@@ -159,28 +160,18 @@ void roll_roller(){
   lcd.setCursor(15,0);
   lcd.print(roller[roll_cnt++]);
   if ( roll_cnt >= sizeof(roller) ) roll_cnt=0;
+  if (wifi_is_ok) {
+    MDNS.update();
+  }
 }
 
 void report(){
-  Serial.println("Sending mDNS query");
-  int n = MDNS.queryService("mqtt", "tcp");  // Send out query for esp tcp services
-  Serial.println("mDNS query done");
-  if (n == 0) {
-    Serial.println("no services found");
-  } else {
-    Serial.print(n);
-    Serial.println(" service(s) found");
-    for (int i = 0; i < n; ++i) {
-      // Print details for each service found
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.print(MDNS.hostname(i));
-      Serial.print(" (");
-      Serial.print(MDNS.IP(i));
-      Serial.print(":");
-      Serial.print(MDNS.port(i));
-      Serial.println(")");
+  if (wifi_is_ok) {
+    unsigned int rc = mdns_resolving("mqtt","tcp","cub.local",&mqtt_host_ip,&mqtt_port);
+    if ( rc == 1 ) {
+      Serial.println("mqtt host found");
+    }else{
+      Serial.println("mqtt host not found");
     }
   }
-  Serial.println();
 }
