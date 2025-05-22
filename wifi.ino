@@ -36,16 +36,15 @@ void on_wifi_disconnect(const WiFiEventStationModeDisconnected& event) {
 }
 
 unsigned int mdns_resolving(char *service, char *proto, char *hostname, IPAddress *ip, uint16_t *port) {
-  Serial.println("Sending mDNS query");
+  unsigned int rc = 0;
+  //Serial.println("Sending mDNS query");
   int n = MDNS.queryService(service, proto);
-  Serial.println("mDNS query done");
-  if (n == 0) {
-    Serial.println("no services found");
-    return(0);
-  } else {
-    Serial.print(n);
-    Serial.println(" service(s) found");
+  //Serial.println("mDNS query done");
+  if (n > 0) {
+    //Serial.print(n);
+    //Serial.println(" service(s) found");
     for (int i = 0; i < n; ++i) {
+      /*
       Serial.print(i + 1);
       Serial.print(": ");
       Serial.print(MDNS.hostname(i));
@@ -54,12 +53,15 @@ unsigned int mdns_resolving(char *service, char *proto, char *hostname, IPAddres
       Serial.print(":");
       Serial.print(MDNS.port(i));
       Serial.println(")");
+      */
       if ( strcmp(MDNS.hostname(i).c_str(), hostname) == 0 ) {
         *ip=MDNS.IP(i);
         *proto=MDNS.port(i);
-        return(1);
+        rc = 1;
+        break;
       }
     }
   }
-  return(0);
+  MDNS.removeQuery();
+  return(rc);
 }

@@ -6,6 +6,7 @@
 #include "TickTwo.h"  // https://github.com/sstaub/TickTwo
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+#include <PubSubClient.h>  // https://github.com/hmueller01/pubsubclient3
 
 hd44780_I2Cexp lcd;
 
@@ -26,7 +27,7 @@ unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
 char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
 bool wifi_is_ok = false;
-IPAddress mqtt_host_ip;
+IPAddress mqtt_host_ip(255,255,255,255);
 uint16_t mqtt_port=1883;
 IPAddress syslog_host_ip;
 uint16_t syslog_port=514;
@@ -166,10 +167,15 @@ void roll_roller(){
 }
 
 void report(){
+  char mqtt_serv[] = "mqtt";
+  char mqtt_proto[] = "tcp";
   if (wifi_is_ok) {
-    unsigned int rc = mdns_resolving("mqtt","tcp","cub.local",&mqtt_host_ip,&mqtt_port);
+    unsigned int rc = mdns_resolving(mqtt_serv,mqtt_proto,mqtt_host,&mqtt_host_ip,&mqtt_port);
     if ( rc == 1 ) {
-      Serial.println("mqtt host found");
+      Serial.print("mqtt host found,");
+      Serial.print(mqtt_host_ip);
+      Serial.print(":");
+      Serial.println(mqtt_port);      
     }else{
       Serial.println("mqtt host not found");
     }
