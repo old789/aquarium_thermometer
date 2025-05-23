@@ -16,21 +16,25 @@ OneWire oneWire2(14);
 DS18B20 ds1(&oneWire1);
 DS18B20 ds2(&oneWire2);
 
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 const int LCD_COLS = 16;
 const int LCD_ROWS = 2;
 
 #define HALT while(true){ delay(100); }
 
 double t1, t2;
+char t1_str[6], t2_str[6];
 bool enable_cli = false;
 unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
 char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
 bool wifi_is_ok = false;
-IPAddress mqtt_host_ip(255,255,255,255);
-uint16_t mqtt_port=1883;
+//IPAddress mqtt_host_ip(255,255,255,255);
+IPAddress mqtt_host_ip(IPADDR_NONE);
+IPAddress prev_mqtt_host_ip(255,255,255,255);
 IPAddress syslog_host_ip;
-uint16_t syslog_port=514;
 
 #include "config.h"
 
@@ -113,7 +117,6 @@ void setup() {
   timer3.start();
   //timer4.start();
   lcd.clear();
-  
 }
 
 void loop() {
@@ -178,6 +181,32 @@ void report(){
       Serial.println(mqtt_port);      
     }else{
       Serial.println("mqtt host not found");
+    }
+    if (mqtt_host_ip == IPADDR_NONE){
+      return;
+    }
+    if ( mqtt_host_ip != prev_mqtt_host_ip ) {
+      client.setServer(mqtt_host_ip, mqtt_port);
+      prev_mqtt_host_ip = mqtt_host_ip;
+    }
+    if (client.connect(dev_name, mqtt_user, mqtt_passw)) {
+      Serial.println("MQTT server connected");
+      dtostrf(t1,1,1,t1_str);
+      dtostrf(t2,1,1,t2_str);
+      if (client.publish("t.aquarium.water", t1_str)) {
+        Serial.println("Published to t.aquarium.water");
+      }else{
+        Serial.println("Error published to t.aquarium.water");
+      }
+      if (client.publish("t.aquarium.room", t2_str)) {
+        Serial.println("Published to t.aquarium.room");
+      }else{
+        Serial.println("Error published to t.aquarium.room");
+      }
+      client.disconnect();
+      Serial.println("MQTT server disconnected");
+    }else{
+      Serial.println("MQTT server not connected");
     }
   }
 }
