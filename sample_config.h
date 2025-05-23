@@ -18,4 +18,7 @@ unsigned int syslog_host_resolving = 0; // 0 - mDNS, 1 - DNS
 char mqtt_host[33] = {0};
 char syslog_host[33] = {0}; 
 
+char mqtt_user[33] = {0};
+char mqtt_passw[33] = {0};
+
 //   Config end
