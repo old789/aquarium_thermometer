@@ -189,7 +189,7 @@ void report(){
       client.setServer(mqtt_host_ip, mqtt_port);
       prev_mqtt_host_ip = mqtt_host_ip;
     }
-    if (client.connect(dev_name, mqtt_user, mqtt_passw)) {
+    if (client.connect(dev_name, mqtt_user, mqtt_passw, NULL, 0, false, NULL, true)) {
       Serial.println("MQTT server connected");
       dtostrf(t1,1,1,t1_str);
       dtostrf(t2,1,1,t2_str);
