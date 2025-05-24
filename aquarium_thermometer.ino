@@ -55,21 +55,18 @@ TickTwo timer3( report, 60000);
 void setup() {
   int status;
   bool sensor1_fail=true, sensor2_fail=true;
-  PGM_P msg_booting=PSTR("\r\nBooting...");
-  PGM_P msg_lcd_fail=PSTR("LCD initialise failed, status = ");
   PGM_P msg_sensor1 = PSTR("sensor 1 ");
   PGM_P msg_sensor2 = PSTR("sensor 2 ");
   PGM_P msg_fail = PSTR("fail");
   PGM_P msg_ok = PSTR("Ok!");
-  // PGM_P msg_ = PSTR();
  
   Serial.begin(115200);
   delay(100);
-  Serial.println(FPSTR(msg_booting));
+  Serial.println(F("\r\nBooting..."));
 
   status=lcd.begin(LCD_COLS, LCD_ROWS);
   if(status){
-    Serial.print(FPSTR(msg_lcd_fail));
+    Serial.print(F("LCD initialise failed, status = "));
     Serial.println(status);
     HALT
   }
@@ -134,24 +131,20 @@ void loop_usual_mode() {
 }
 
 void read_themperatures(){
-  PGM_P msg_t1 = PSTR("Aqua t = ");
-  PGM_P msg_t2 = PSTR("Room t = ");
-  PGM_P msg_spacer = PSTR("  ");
-  // PGM_P msg_ = PSTR();
   if (ds1.isConversionComplete()){
     t1=ds1.getTempC();
     lcd.setCursor(0,0);
-    lcd.print(FPSTR(msg_t1));
+    lcd.print(F("Aqua t = "));
     lcd.print(t1,1);
-    lcd.print(msg_spacer);
+    lcd.print(F("  "));
     ds1.requestTemperatures();
   }
   if (ds2.isConversionComplete()){
     t2=ds2.getTempC();
     lcd.setCursor(0,1);
-    lcd.print(msg_t2);
+    lcd.print(F("Room t = "));
     lcd.print(t2,1);
-    lcd.print(msg_spacer);
+    lcd.print(F("  "));
     ds2.requestTemperatures();
   }
 }
