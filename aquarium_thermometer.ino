@@ -22,6 +22,7 @@ PubSubClient client(espClient);
 const int LCD_COLS = 16;
 const int LCD_ROWS = 2;
 
+#define UNSUCCESSFUL_ATTEMPTS_COUNT 30
 #define HALT while(true){ delay(100); }
 
 double t1, t2;
@@ -31,10 +32,11 @@ unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
 char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using that
 bool wifi_is_ok = false;
-//IPAddress mqtt_host_ip(255,255,255,255);
 IPAddress mqtt_host_ip(IPADDR_NONE);
-IPAddress prev_mqtt_host_ip(255,255,255,255);
+IPAddress prev_mqtt_host_ip(IPADDR_NONE);
 IPAddress syslog_host_ip;
+unsigned int unsucessfull_attempt=0;
+bool first_message_after_boot = true;
 
 #include "config.h"
 
@@ -59,8 +61,6 @@ void setup() {
   PGM_P msg_sensor2 = PSTR("sensor 2 ");
   PGM_P msg_fail = PSTR("fail");
   PGM_P msg_ok = PSTR("Ok!");
-  // PGM_P msg_ = PSTR();
-  // PGM_P msg_ = PSTR();
   // PGM_P msg_ = PSTR();
  
   Serial.begin(115200);
@@ -112,11 +112,11 @@ void setup() {
   on_wifi_disconnect_handler = WiFi.onStationModeDisconnected(on_wifi_disconnect);
   wifi_init();
   delay(2000);
+  lcd.clear();
+  read_themperatures();
   timer1.start();
   timer2.start();
   timer3.start();
-  //timer4.start();
-  lcd.clear();
 }
 
 void loop() {
@@ -131,10 +131,6 @@ void loop_usual_mode() {
   timer1.update();
   timer2.update();
   timer3.update();
-//  timer4.update();
-//  if ( standalone == 0 ) {
-//    timer5.update();
-//  }
 }
 
 void read_themperatures(){
@@ -172,41 +168,53 @@ void roll_roller(){
 void report(){
   char mqtt_serv[] = "mqtt";
   char mqtt_proto[] = "tcp";
+  unsucessfull_attempt++;
   if (wifi_is_ok) {
-    unsigned int rc = mdns_resolving(mqtt_serv,mqtt_proto,mqtt_host,&mqtt_host_ip,&mqtt_port);
-    if ( rc == 1 ) {
-      Serial.print("mqtt host found,");
-      Serial.print(mqtt_host_ip);
-      Serial.print(":");
-      Serial.println(mqtt_port);      
-    }else{
-      Serial.println("mqtt host not found");
+    if ( mqtt_host_resolving == 1 ) {  
+      // using a hostname as a MQTT server address
+      client.setServer(mqtt_host, mqtt_port);
+    } else {
+      // looking for a MQTT server IP in mDNS 
+      unsigned int rc = mdns_resolving(mqtt_serv,mqtt_proto,mqtt_host,&mqtt_host_ip,&mqtt_port);
+      if ( rc != 1 ) {
+        Serial.println(F("MQTT host not found"));
+      }
+      if (mqtt_host_ip == IPADDR_NONE){
+        return;
+      }
+      if ( mqtt_host_ip != prev_mqtt_host_ip ) {
+        client.setServer(mqtt_host_ip, mqtt_port);
+        prev_mqtt_host_ip = mqtt_host_ip;
+        Serial.print(F("MQTT host IP: "));
+        Serial.println(mqtt_host_ip);
+      }
     }
-    if (mqtt_host_ip == IPADDR_NONE){
+    if (!client.connect(dev_name, mqtt_user, mqtt_passw, NULL, 0, false, NULL, true)) {
+      Serial.println(F("MQTT server not connected"));
       return;
     }
-    if ( mqtt_host_ip != prev_mqtt_host_ip ) {
-      client.setServer(mqtt_host_ip, mqtt_port);
-      prev_mqtt_host_ip = mqtt_host_ip;
-    }
-    if (client.connect(dev_name, mqtt_user, mqtt_passw, NULL, 0, false, NULL, true)) {
-      Serial.println("MQTT server connected");
-      dtostrf(t1,1,1,t1_str);
-      dtostrf(t2,1,1,t2_str);
-      if (client.publish("t.aquarium.water", t1_str)) {
-        Serial.println("Published to t.aquarium.water");
-      }else{
-        Serial.println("Error published to t.aquarium.water");
+    if ( first_message_after_boot ) {
+      if (!client.publish("system.events", "boot")) {
+        Serial.println(F("Error publishing to system.events"));
+        return;
       }
-      if (client.publish("t.aquarium.room", t2_str)) {
-        Serial.println("Published to t.aquarium.room");
-      }else{
-        Serial.println("Error published to t.aquarium.room");
-      }
-      client.disconnect();
-      Serial.println("MQTT server disconnected");
-    }else{
-      Serial.println("MQTT server not connected");
+      first_message_after_boot = false;
     }
+    dtostrf(t1,1,1,t1_str);
+    if (!client.publish("t.aquarium.water", t1_str)) {
+      Serial.println(F("Error publishing to t.aquarium.water"));
+      return;
+    }
+    dtostrf(t2,1,1,t2_str);
+    if (!client.publish("t.aquarium.room", t2_str)) {
+      Serial.println(F("Error published to t.aquarium.room"));
+      return;
+    }
+    client.disconnect();
+    unsucessfull_attempt=0;
+  }
+  if ( unsucessfull_attempt > UNSUCCESSFUL_ATTEMPTS_COUNT ) {
+    Serial.println(F("Too many unsucessfull attempts to publish, restart"));
+    ESP.restart();
   }
 }
