@@ -7,6 +7,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <PubSubClient.h>  // https://github.com/hmueller01/pubsubclient3
+#include <Terminal.h>  // https://github.com/johngavel/Terminal
 
 hd44780_I2Cexp lcd;
 
@@ -18,6 +19,8 @@ DS18B20 ds2(&oneWire2);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+Terminal terminal(&Serial);
 
 #define LCD_COLS 16
 #define LCD_ROWS 2
@@ -187,3 +190,19 @@ void print_warning_sign(bool oops){
     lcd.print(" ");
   }
 }
+
+bool wait_for_key_pressed( uint8_t tries ) {
+  PGM_P msg_wait = PSTR("Wait for input");
+  Serial.println(FPSTR(msg_wait));
+  lcd.clear();
+  for ( uint8_t i=0; i < tries; i++ ) {
+      lcd.setCursor(0,0); lcd.print(msg_wait);
+      lcd.setCursor(0,1); lcd.print(tries-i); 
+      delay(1000);
+      if ( Serial.available() ) {
+        return(true);
+      }
+  }
+  return(false);
+}
+
