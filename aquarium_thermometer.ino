@@ -104,16 +104,20 @@ void setup() {
 
   ds1.requestTemperatures();
   ds2.requestTemperatures();
-  on_wifi_connect_handler = WiFi.onStationModeConnected(on_wifi_connect);
-  on_wifi_got_IP_handler = WiFi.onStationModeGotIP(on_wifi_got_IP);
-  on_wifi_disconnect_handler = WiFi.onStationModeDisconnected(on_wifi_disconnect);
-  wifi_init();
+  if ( network_enable ) {
+    on_wifi_connect_handler = WiFi.onStationModeConnected(on_wifi_connect);
+    on_wifi_got_IP_handler = WiFi.onStationModeGotIP(on_wifi_got_IP);
+    on_wifi_disconnect_handler = WiFi.onStationModeDisconnected(on_wifi_disconnect);
+    wifi_init();
+  }
   delay(2000);
   lcd.clear();
   read_themperatures();
   timer1.start();
   timer2.start();
-  timer3.start();
+  if ( network_enable ) {
+    timer3.start();
+  }
 }
 
 void loop() {
@@ -127,7 +131,9 @@ void loop() {
 void loop_usual_mode() {
   timer1.update();
   timer2.update();
-  timer3.update();
+  if ( network_enable ) {
+    timer3.update();
+  }
 }
 
 void read_themperatures(){
@@ -153,7 +159,7 @@ void roll_roller(){
   lcd.setCursor(15,0);
   lcd.print(roller[roll_cnt++]);
   if ( roll_cnt >= sizeof(roller) ) roll_cnt=0;
-  if (wifi_is_ok) {
+  if ( network_enable and wifi_is_ok ) {
     MDNS.update();
   }
 }

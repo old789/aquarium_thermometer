@@ -12,6 +12,8 @@ char ssid[33] = {0};
 // WiFi password
 char passw[65] = {0};
 
+bool network_enable = true;
+
 unsigned int mqtt_host_resolving = 0; // 0 - mDNS, 1 - DNS
 unsigned int syslog_host_resolving = 0; // 0 - mDNS, 1 - DNS
 
