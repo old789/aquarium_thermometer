@@ -7,7 +7,7 @@ void wifi_init(){
 }
 
 void on_wifi_connect(const WiFiEventStationModeConnected& event) {
-  Serial.print(F("Connected to Wi-Fi sucessfully"));
+  Serial.print(F("Connected to Wi-Fi sucessfully, "));
   Serial.print(F("RSSI: "));
   Serial.println(WiFi.RSSI());
   WiFi.setAutoReconnect(true);
@@ -40,7 +40,7 @@ unsigned int mdns_resolving(char *service, char *proto, char *hostname, IPAddres
   int n = MDNS.queryService(service, proto);
   if (n > 0) {
     for (int i = 0; i < n; ++i) {
-      /*
+    /*  
       Serial.print(i + 1);
       Serial.print(": ");
       Serial.print(MDNS.hostname(i));
@@ -49,7 +49,7 @@ unsigned int mdns_resolving(char *service, char *proto, char *hostname, IPAddres
       Serial.print(":");
       Serial.print(MDNS.port(i));
       Serial.println(")");
-      */
+    */  
       if ( strcmp(MDNS.hostname(i).c_str(), hostname) == 0 ) {
         *ip=MDNS.IP(i);
         *proto=MDNS.port(i);

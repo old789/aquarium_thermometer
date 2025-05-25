@@ -26,7 +26,6 @@ const int LCD_ROWS = 2;
 #define HALT while(true){ delay(100); }
 
 double t1, t2;
-char t1_str[6], t2_str[6];
 bool enable_cli = false;
 unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
@@ -34,10 +33,9 @@ char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using
 bool wifi_is_ok = false;
 IPAddress mqtt_host_ip(IPADDR_NONE);
 IPAddress prev_mqtt_host_ip(IPADDR_NONE);
-unsigned int unsucessfull_attempt=0;
+uint16_t prev_mqtt_port = 1883;
+unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
-char mqtt_serv[] = "mqtt";
-char mqtt_proto[] = "tcp";
 
 #include "config.h"
 
