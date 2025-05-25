@@ -34,7 +34,6 @@ char roller[] = { 238, 239 };  // cheap LCD d'not have some characters, so using
 bool wifi_is_ok = false;
 IPAddress mqtt_host_ip(IPADDR_NONE);
 IPAddress prev_mqtt_host_ip(IPADDR_NONE);
-IPAddress syslog_host_ip;
 unsigned int unsucessfull_attempt=0;
 bool first_message_after_boot = true;
 
