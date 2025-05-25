@@ -36,6 +36,8 @@ IPAddress mqtt_host_ip(IPADDR_NONE);
 IPAddress prev_mqtt_host_ip(IPADDR_NONE);
 unsigned int unsucessfull_attempt=0;
 bool first_message_after_boot = true;
+char mqtt_serv[] = "mqtt";
+char mqtt_proto[] = "tcp";
 
 #include "config.h"
 
@@ -157,59 +159,19 @@ void read_themperatures(){
 void roll_roller(){
   lcd.setCursor(15,0);
   lcd.print(roller[roll_cnt++]);
-  if ( roll_cnt >= sizeof(roller) ) roll_cnt=0;
+  if ( roll_cnt >= sizeof(roller) ) {
+    roll_cnt=0;
+  }
   if ( network_enable and wifi_is_ok ) {
     MDNS.update();
   }
 }
 
 void report(){
-  char mqtt_serv[] = "mqtt";
-  char mqtt_proto[] = "tcp";
   unsucessfull_attempt++;
-  if (wifi_is_ok) {
-    if ( mqtt_host_resolving == 1 ) {  
-      // using a hostname as a MQTT server address
-      client.setServer(mqtt_host, mqtt_port);
-    } else {
-      // looking for a MQTT server IP in mDNS 
-      unsigned int rc = mdns_resolving(mqtt_serv,mqtt_proto,mqtt_host,&mqtt_host_ip,&mqtt_port);
-      if ( rc != 1 ) {
-        Serial.println(F("MQTT host not found"));
-      }
-      if (mqtt_host_ip == IPADDR_NONE){
-        return;
-      }
-      if ( mqtt_host_ip != prev_mqtt_host_ip ) {
-        client.setServer(mqtt_host_ip, mqtt_port);
-        prev_mqtt_host_ip = mqtt_host_ip;
-        Serial.print(F("MQTT host IP: "));
-        Serial.println(mqtt_host_ip);
-      }
-    }
-    if (!client.connect(dev_name, mqtt_user, mqtt_passw, NULL, 0, false, NULL, true)) {
-      Serial.println(F("MQTT server not connected"));
-      return;
-    }
-    if ( first_message_after_boot ) {
-      if (!client.publish("system.events", "boot")) {
-        Serial.println(F("Error publishing to system.events"));
-        return;
-      }
-      first_message_after_boot = false;
-    }
-    dtostrf(t1,1,1,t1_str);
-    if (!client.publish("t.aquarium.water", t1_str)) {
-      Serial.println(F("Error publishing to t.aquarium.water"));
-      return;
-    }
-    dtostrf(t2,1,1,t2_str);
-    if (!client.publish("t.aquarium.room", t2_str)) {
-      Serial.println(F("Error published to t.aquarium.room"));
-      return;
-    }
-    client.disconnect();
+  if ( wifi_is_ok and mqtt_setserver() and mqtt_publish() ) {
     unsucessfull_attempt=0;
+    return;
   }
   if ( unsucessfull_attempt > UNSUCCESSFUL_ATTEMPTS_COUNT ) {
     Serial.println(F("Too many unsucessfull attempts to publish, restart"));
