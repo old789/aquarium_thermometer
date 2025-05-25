@@ -18,6 +18,7 @@ void on_wifi_got_IP(const WiFiEventStationModeGotIP& event) {
   Serial.print(F("Obtained IP address: "));
   Serial.println(WiFi.localIP());
   wifi_is_ok = true;
+  print_warning_sign(false);
    // Start mDNS
   if (!MDNS.begin(dev_name)) {             
     Serial.println(F("Error starting mDNS"));
@@ -31,6 +32,7 @@ void on_wifi_disconnect(const WiFiEventStationModeDisconnected& event) {
   Serial.print(F("Disconnected from Wi-Fi, reason: "));
   Serial.println(event.reason);
   wifi_is_ok = false;
+  print_warning_sign(true);
   WiFi.disconnect();
   wifi_init();
 }

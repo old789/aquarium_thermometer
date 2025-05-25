@@ -169,10 +169,21 @@ void report(){
   unsucessfull_attempt++;
   if ( wifi_is_ok and mqtt_setserver() and mqtt_publish() ) {
     unsucessfull_attempt=0;
+    print_warning_sign(false);
     return;
   }
+  print_warning_sign(true);
   if ( unsucessfull_attempt > UNSUCCESSFUL_ATTEMPTS_COUNT ) {
     Serial.println(F("Too many unsucessfull attempts to publish, restart"));
     ESP.restart();
+  }
+}
+
+void print_warning_sign(bool oops){
+  lcd.setCursor(15,1);
+  if ( oops ) {
+    lcd.print("!");
+  }else{
+    lcd.print(" ");
   }
 }
