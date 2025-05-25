@@ -19,7 +19,7 @@ void on_wifi_got_IP(const WiFiEventStationModeGotIP& event) {
   Serial.println(WiFi.localIP());
   wifi_is_ok = true;
   print_warning_sign(false);
-   // Start mDNS
+  // Start mDNS
   if (!MDNS.begin(dev_name)) {             
     Serial.println(F("Error starting mDNS"));
   }else{
