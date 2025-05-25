@@ -19,8 +19,8 @@ DS18B20 ds2(&oneWire2);
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const int LCD_COLS = 16;
-const int LCD_ROWS = 2;
+#define LCD_COLS 16
+#define LCD_ROWS 2
 
 #define UNSUCCESSFUL_ATTEMPTS_COUNT 30
 #define HALT while(true){ delay(100); }
