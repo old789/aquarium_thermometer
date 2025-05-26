@@ -74,6 +74,12 @@ void setup() {
   }
 
   lcd.clear();
+  if ( wait_for_key_pressed(10) ) {
+    enable_cli=true;
+    return;
+  }
+
+  lcd.clear();
   lcd.print(FPSTR(msg_sensor1));
   Serial.print(FPSTR(msg_sensor1));
   if (ds1.begin() == false){
@@ -124,7 +130,7 @@ void setup() {
 
 void loop() {
   if (enable_cli) {
-    // loop_cli_mode();
+    loop_cli_mode();
   }else{
     loop_usual_mode();
   }
@@ -192,15 +198,16 @@ void print_warning_sign(bool oops){
 }
 
 bool wait_for_key_pressed( uint8_t tries ) {
-  PGM_P msg_wait = PSTR("Wait for input");
-  Serial.println(FPSTR(msg_wait));
+  Serial.println(F("\r\nPress space key for enter in configuration mode"));
   lcd.clear();
   for ( uint8_t i=0; i < tries; i++ ) {
-      lcd.setCursor(0,0); lcd.print(msg_wait);
-      lcd.setCursor(0,1); lcd.print(tries-i); 
+      lcd.setCursor(0,0); lcd.print(F("Wait for input"));
+      lcd.setCursor(0,1); lcd.printf("%02d",tries-i); 
       delay(1000);
       if ( Serial.available() ) {
-        return(true);
+        if ( Serial.read() == ' ' ){
+          return(true);
+        }
       }
   }
   return(false);
