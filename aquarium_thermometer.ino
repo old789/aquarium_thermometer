@@ -55,31 +55,43 @@ TickTwo timer2( roll_roller, 700);
 TickTwo timer3( report, 60000);
 
 void setup() {
-  int status;
-  bool sensor1_fail=true, sensor2_fail=true;
-  PGM_P msg_sensor1 = PSTR("sensor 1 ");
-  PGM_P msg_sensor2 = PSTR("sensor 2 ");
-  PGM_P msg_fail = PSTR("fail");
-  PGM_P msg_ok = PSTR("Ok!");
+  int lcd_status;
  
   Serial.begin(115200);
   delay(100);
   Serial.println(F("\r\nBooting..."));
 
-  status=lcd.begin(LCD_COLS, LCD_ROWS);
-  if(status){
+  lcd_status=lcd.begin(LCD_COLS, LCD_ROWS);
+  if( lcd_status ){
     Serial.print(F("LCD initialise failed, status = "));
-    Serial.println(status);
+    Serial.println(lcd_status);
     HALT
   }
 
   lcd.clear();
-  if ( wait_for_key_pressed(10) ) {
-    enable_cli=true;
-    return;
+  enable_cli=wait_for_key_pressed(10);
+  if ( enable_cli ) {
+    setup_cli_mode();
+  }else{
+    setup_usual_mode();
   }
+}
 
-  lcd.clear();
+void loop() {
+  if (enable_cli) {
+    loop_cli_mode();
+  }else{
+    loop_usual_mode();
+  }
+}
+
+void setup_usual_mode(){
+  bool sensor1_fail=true, sensor2_fail=true;
+  PGM_P msg_sensor1 = PSTR("sensor 1 ");
+  PGM_P msg_sensor2 = PSTR("sensor 2 ");
+  PGM_P msg_fail = PSTR("fail");
+  PGM_P msg_ok = PSTR("Ok!");
+
   lcd.print(FPSTR(msg_sensor1));
   Serial.print(FPSTR(msg_sensor1));
   if (ds1.begin() == false){
@@ -125,14 +137,6 @@ void setup() {
   timer2.start();
   if ( network_enable ) {
     timer3.start();
-  }
-}
-
-void loop() {
-  if (enable_cli) {
-    loop_cli_mode();
-  }else{
-    loop_usual_mode();
   }
 }
 
