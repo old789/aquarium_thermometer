@@ -12,9 +12,9 @@ void setup_cli_mode(){
   TERM_CMD->addCmd("network", "[0/1]", "Network enable(1)/disable(0)", set_network_mode);
   TERM_CMD->addCmd("ssid", "[word]", "Set WiFi SSID", set_ssid);
   TERM_CMD->addCmd("passw", "[word]", "Set WiFi password", set_passw);
-  TERM_CMD->addCmd("dns", "[0/1]", "Resolving mode: 0 - mDNS, 1 - DNS", set_res);
-  TERM_CMD->addCmd("host", "[hostname or IP]", "Set address of a MQTT broker", set_host);
-  TERM_CMD->addCmd("port", "[number]", "Set port of a MQTT broker", set_port);
+  TERM_CMD->addCmd("dns", "[0/1]", "Resolving mode: 0 - mDNS, 1 - DNS", set_dns);
+  TERM_CMD->addCmd("host", "[hostname or IP]", "Set address of a MQTT broker", set_mqtt_host);
+  TERM_CMD->addCmd("port", "[number]", "Set port of a MQTT broker", set_mqtt_port);
   TERM_CMD->addCmd("muser", "[word]", "Set MQTT user", set_mqtt_user);
   TERM_CMD->addCmd("mpassw", "[word]", "Set MQTT pasword", set_mqtt_passw);
   TERM_CMD->addCmd("show", "", "Show configuration", show_conf);
@@ -137,155 +137,113 @@ void set_dns (Terminal* terminal) {
   terminal->prompt();
 }
 
-void set_host (Terminal* terminal) {
+void set_mqtt_host (Terminal* terminal) {
   bool passed = false;
   String value = terminal->readParameter();
   if (value == NULL) {
     terminal->invalidParameter();
   } else {
-    memset(host, 0, sizeof(host));
-    value.toCharArray(host, sizeof(host)-1 );
+    memset(mqtt_host, 0, sizeof(mqtt_host));
+    value.toCharArray(mqtt_host, sizeof(mqtt_host)-1 );
     passed = true;
   }
   terminal->println();
   if ( passed ) {
-    terminal->println(PASSED, "Hostname set to \"" + String(host) + "\"");
+    terminal->println(PASSED, "Hostname set to \"" + String(mqtt_host) + "\"");
   } else {
     terminal->println(FAILED, "Hostname not set");
   }
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
+void set_mqtt_port (Terminal* terminal) {
   bool passed = false;
   String value = terminal->readParameter();
   if (value == NULL) {
     terminal->invalidParameter();
   } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
-    passed = true;
+    mqtt_port = value.toInt();
+    if ( mqtt_port > 0 and mqtt_port < 0xffff) {
+      passed = true;
+    } else {
+      terminal->println(ERROR, "Parameter " + value + " is not between 0 and 0xffff!");
+    }
   }
   terminal->println();
   if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
+    terminal->println(PASSED, "MQTT broker port set to \"" + String(mqtt_port) + "\"");
   } else {
-    terminal->println(FAILED, "Device name not set");
+    terminal->println(FAILED, "MQTT broker port not set");
   }
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
+void set_mqtt_user (Terminal* terminal) {
   bool passed = false;
   String value = terminal->readParameter();
   if (value == NULL) {
     terminal->invalidParameter();
   } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
+    memset(mqtt_user, 0, sizeof(mqtt_user));
+    value.toCharArray(mqtt_user, sizeof(mqtt_user)-1 );
     passed = true;
   }
   terminal->println();
   if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
+    terminal->println(PASSED, "MQTT username set to \"" + String(mqtt_user) + "\"");
   } else {
-    terminal->println(FAILED, "Device name not set");
+    terminal->println(FAILED, "MQTT username not set");
   }
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
+void set_mqtt_passw (Terminal* terminal) {
   bool passed = false;
   String value = terminal->readParameter();
   if (value == NULL) {
     terminal->invalidParameter();
   } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
+    memset(mqtt_passw, 0, sizeof(mqtt_passw));
+    value.toCharArray(mqtt_passw, sizeof(mqtt_passw)-1 );
     passed = true;
   }
   terminal->println();
   if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
+    terminal->println(PASSED, "MQTT password set to \"" + String(mqtt_passw) + "\"");
   } else {
-    terminal->println(FAILED, "Device name not set");
+    terminal->println(FAILED, "MQTT passwoord not set");
   }
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
+void show_conf (Terminal* terminal) {
+  if ( network_enable )
+    terminal->println(PASSED,"Network enabled");
+  else
+    terminal->println(PASSED,"Network disabled");
+  terminal->println(PASSED,"Device name = \"" + String(dev_name) + "\"");
+  terminal->println(PASSED,"WiFi SSID = \"" + String(ssid) + "\"");
+  terminal->println(PASSED,"WiFi password = \"" + String(passw) + "\"");
+  if ( mqtt_host_resolving == 0 ) {
+    terminal->println(PASSED,"Resolving mode: mDNS");
   } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
-    passed = true;
+    terminal->println(PASSED,"Resolving mode: DNS");
   }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
-  } else {
-    terminal->println(FAILED, "Device name not set");
-  }
+  terminal->println(PASSED,"MQTT broker host = \"" + String(mqtt_host) + "\"");
+  terminal->println(PASSED,"MQTT broker port = \"" + String(mqtt_port) + "\"");
+  terminal->println(PASSED,"MQTT username = \"" + String(mqtt_user) + "\"");
+  terminal->println(PASSED,"MQTT password = \"" + String(mqtt_passw) +"\"");
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
-  } else {
-    terminal->println(FAILED, "Device name not set");
-  }
+void save_conf (Terminal* terminal) {
+  //eeprom_save();
+  terminal->println(PASSED,"Configuration saved to EEPROM");
   terminal->prompt();
 }
 
-void set_ (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
-  } else {
-    terminal->println(FAILED, "Device name not set");
-  }
-  terminal->prompt();
+void reboot (Terminal* terminal) {
+  Serial.println("Reboot...");
+  delay(3000);
+  ESP.restart();
 }
-
-void set_ (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
-  } else {
-    terminal->println(FAILED, "Device name not set");
-  }
-  terminal->prompt();
-}
-

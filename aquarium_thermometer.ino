@@ -40,7 +40,18 @@ uint16_t prev_mqtt_port = 1883;
 unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
 
-#include "config.h"
+//   Config begin
+char dev_name[33] = {0};  // Name of system for logging
+char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
+char ssid[33] = {0}; // WiFi SSID
+char passw[65] = {0}; // WiFi password
+bool network_enable = true; // Send data to MQTT or standalone mode ( false )
+unsigned int mqtt_host_resolving = 0; // Resolving mode: 0 - mDNS, 1 - DNS
+char mqtt_host[33] = {0}; // hostname ( DNS or mDNS mode )or IP ( DNS only mode )of a MQTT server
+uint16_t mqtt_port = 1883;
+char mqtt_user[33] = {0};  // MQTT authentification parameters
+char mqtt_passw[33] = {0}; // MQTT authentification parameters
+//   Config end
 
 WiFiEventHandler on_wifi_connect_handler;
 WiFiEventHandler on_wifi_got_IP_handler;
