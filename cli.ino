@@ -7,6 +7,7 @@ void setup_cli_mode(){
   lcd.print(F(" Configuration"));
   terminal.setup();
   terminal.setPrompt(">");
+  terminal.useBS(true);
   addStandardTerminalCommands();
   TERM_CMD->addCmd("name", "[word]", "Set device name", set_name);
   TERM_CMD->addCmd("network", "[0/1]", "Network enable(1)/disable(0)", set_network_mode);
@@ -218,21 +219,21 @@ void set_mqtt_passw (Terminal* terminal) {
 
 void show_conf (Terminal* terminal) {
   if ( network_enable )
-    terminal->println(PASSED,"Network enabled");
+    terminal->println(INFO,"Network enabled");
   else
-    terminal->println(PASSED,"Network disabled");
-  terminal->println(PASSED,"Device name = \"" + String(dev_name) + "\"");
-  terminal->println(PASSED,"WiFi SSID = \"" + String(ssid) + "\"");
-  terminal->println(PASSED,"WiFi password = \"" + String(passw) + "\"");
+    terminal->println(INFO,"Network disabled");
+  terminal->println(INFO,"Device name = \"" + String(dev_name) + "\"");
+  terminal->println(INFO,"WiFi SSID = \"" + String(ssid) + "\"");
+  terminal->println(INFO,"WiFi password = \"" + String(passw) + "\"");
   if ( mqtt_host_resolving == 0 ) {
-    terminal->println(PASSED,"Resolving mode: mDNS");
+    terminal->println(INFO,"Resolving mode: mDNS");
   } else {
-    terminal->println(PASSED,"Resolving mode: DNS");
+    terminal->println(INFO,"Resolving mode: DNS");
   }
-  terminal->println(PASSED,"MQTT broker host = \"" + String(mqtt_host) + "\"");
-  terminal->println(PASSED,"MQTT broker port = \"" + String(mqtt_port) + "\"");
-  terminal->println(PASSED,"MQTT username = \"" + String(mqtt_user) + "\"");
-  terminal->println(PASSED,"MQTT password = \"" + String(mqtt_passw) +"\"");
+  terminal->println(INFO,"MQTT broker host = \"" + String(mqtt_host) + "\"");
+  terminal->println(INFO,"MQTT broker port = \"" + String(mqtt_port) + "\"");
+  terminal->println(INFO,"MQTT username = \"" + String(mqtt_user) + "\"");
+  terminal->println(INFO,"MQTT password = \"" + String(mqtt_passw) +"\"");
   terminal->prompt();
 }
 

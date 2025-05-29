@@ -81,6 +81,7 @@ void setup() {
 
   lcd.clear();
   enable_cli=wait_for_key_pressed(10);
+  lcd.clear();
   if ( enable_cli ) {
     setup_cli_mode();
   }else{
