@@ -25,23 +25,28 @@ void setup_cli_mode(){
   terminal.prompt();
 }
 
-void set_name(Terminal* terminal) {
+void set_string_parameter(Terminal* terminal, char* param, unsigned int param_size, String param_name){
   bool passed = false;
   String value = terminal->readParameter();
   if (value == NULL) {
     terminal->invalidParameter();
   } else {
-    memset(dev_name, 0, sizeof(dev_name));
-    value.toCharArray(dev_name, sizeof(dev_name)-1 );
+    memset(param, 0, param_size);
+    value.toCharArray(param, param_size-1 );
     passed = true;
   }
   terminal->println();
   if ( passed ) {
-    terminal->println(PASSED, "Device name set to \"" + String(dev_name) + "\"");
+    terminal->println(PASSED, param_name + " set to \"" + String(param) + "\"");
   } else {
-    terminal->println(FAILED, "Device name not set");
+    terminal->println(FAILED, param_name + " not set");
   }
   terminal->prompt();
+}
+  
+
+void set_name(Terminal* terminal) {
+  set_string_parameter( terminal, dev_name, sizeof(dev_name), "Device name");
 }
 
 void set_network_mode (Terminal* terminal) {
@@ -73,41 +78,11 @@ void set_network_mode (Terminal* terminal) {
 }
 
 void set_ssid (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(ssid, 0, sizeof(ssid));
-    value.toCharArray(ssid, sizeof(ssid)-1);
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "SSID set to \"" + String(ssid) + "\"");
-  } else {
-    terminal->println(FAILED, "SSID not set");
-  }
-  terminal->prompt();
+  set_string_parameter( terminal, ssid, sizeof(ssid), "SSID");
 }
 
 void set_passw (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(passw, 0, sizeof(passw));
-    value.toCharArray(passw, sizeof(passw)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "WiFi password set to \"" + String(passw) + "\"");
-  } else {
-    terminal->println(FAILED, "WiFi password not set");
-  }
-  terminal->prompt();
+  set_string_parameter( terminal, passw, sizeof(passw), "WiFi password");
 }
 
 void set_dns (Terminal* terminal) {
@@ -139,22 +114,7 @@ void set_dns (Terminal* terminal) {
 }
 
 void set_mqtt_host (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(mqtt_host, 0, sizeof(mqtt_host));
-    value.toCharArray(mqtt_host, sizeof(mqtt_host)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "Hostname set to \"" + String(mqtt_host) + "\"");
-  } else {
-    terminal->println(FAILED, "Hostname not set");
-  }
-  terminal->prompt();
+  set_string_parameter( terminal, mqtt_host, sizeof(mqtt_host), "Hostname");
 }
 
 void set_mqtt_port (Terminal* terminal) {
@@ -180,41 +140,11 @@ void set_mqtt_port (Terminal* terminal) {
 }
 
 void set_mqtt_user (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(mqtt_user, 0, sizeof(mqtt_user));
-    value.toCharArray(mqtt_user, sizeof(mqtt_user)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "MQTT username set to \"" + String(mqtt_user) + "\"");
-  } else {
-    terminal->println(FAILED, "MQTT username not set");
-  }
-  terminal->prompt();
+  set_string_parameter( terminal, mqtt_user, sizeof(mqtt_user), "MQTT username");
 }
 
 void set_mqtt_passw (Terminal* terminal) {
-  bool passed = false;
-  String value = terminal->readParameter();
-  if (value == NULL) {
-    terminal->invalidParameter();
-  } else {
-    memset(mqtt_passw, 0, sizeof(mqtt_passw));
-    value.toCharArray(mqtt_passw, sizeof(mqtt_passw)-1 );
-    passed = true;
-  }
-  terminal->println();
-  if ( passed ) {
-    terminal->println(PASSED, "MQTT password set to \"" + String(mqtt_passw) + "\"");
-  } else {
-    terminal->println(FAILED, "MQTT passwoord not set");
-  }
-  terminal->prompt();
+  set_string_parameter( terminal, mqtt_passw, sizeof(mqtt_passw), "MQTT passwoord");
 }
 
 void show_conf (Terminal* terminal) {
@@ -233,7 +163,7 @@ void show_conf (Terminal* terminal) {
   terminal->println(INFO,"MQTT broker host = \"" + String(mqtt_host) + "\"");
   terminal->println(INFO,"MQTT broker port = \"" + String(mqtt_port) + "\"");
   terminal->println(INFO,"MQTT username = \"" + String(mqtt_user) + "\"");
-  terminal->println(INFO,"MQTT password = \"" + String(mqtt_passw) +"\"");
+  terminal->println(INFO,"MQTT password = \"" + String(mqtt_passw) + "\"");
   terminal->prompt();
 }
 
