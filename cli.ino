@@ -168,7 +168,7 @@ void show_conf (Terminal* terminal) {
 }
 
 void save_conf (Terminal* terminal) {
-  //eeprom_save();
+  eeprom_save();
   terminal->println(PASSED,"Configuration saved to EEPROM");
   terminal->prompt();
 }

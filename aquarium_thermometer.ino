@@ -4,6 +4,7 @@
 #include <hd44780ioClass/hd44780_I2Cexp.h>
 #include <DS18B20.h>  // https://github.com/RobTillaart/DS18B20_RT
 #include "TickTwo.h"  // https://github.com/sstaub/TickTwo
+#include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <PubSubClient.h>  // https://github.com/hmueller01/pubsubclient3
@@ -41,30 +42,32 @@ unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
 char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
 
-//   Config begin
-// EEPROM data
+// Config begin
 uint16_t mark = 0x55aa;
-bool network_enable = true; // Send data to MQTT or standalone mode ( false )
-char dev_name[33] = {0};  // Name of system for logging
-char ssid[33] = {0}; // WiFi SSID
-char passw[65] = {0}; // WiFi password
+bool network_enable = false;  // Send data to MQTT or standalone mode ( false )
+char dev_name[33] = {0};      // Name of system for logging
+char ssid[33] = {0};          // WiFi SSID
+char passw[65] = {0};         // WiFi password
 unsigned int mqtt_host_resolving = 0; // Resolving mode: 0 - mDNS, 1 - DNS
-char mqtt_host[33] = {0}; // hostname ( DNS or mDNS mode )or IP ( DNS only mode )of a MQTT server
+char mqtt_host[33] = {0};     // hostname ( DNS or mDNS mode )or IP ( DNS only mode )of a MQTT server
 uint16_t mqtt_port = 1883;
-char mqtt_user[33] = {0};  // MQTT authentification parameters
-char mqtt_passw[33] = {0}; // MQTT authentification parameters
+char mqtt_user[33] = {0};     // MQTT authentification parameters
+char mqtt_passw[33] = {0};    // MQTT authentification parameters
 //   Config end
 
-#define PT_STANDALONE       sizeof(mark)
-#define PT_DEV_NAME         PT_STANDALONE + sizeof(standalone)
-#define PT_SSID             PT_UPS_MODEL + sizeof(ups_model)
+// EEPROM data definition
+#define PT_NETWORK_ENA      sizeof(mark)
+#define PT_DEV_NAME         PT_NETWORK_ENA + sizeof(network_enable)
+#define PT_SSID             PT_DEV_NAME + sizeof(dev_name)
 #define PT_PASSW            PT_SSID + sizeof(ssid)
-#define PT_HOST             PT_PASSW + sizeof(passw)
-#define PT_PORT             PT_HOST + sizeof(host)
-#define PT_HUSER            PT_AUTH + sizeof(http_auth)
-#define PT_HPASSW           PT_HUSER + sizeof(http_user)
-#define PT_CRC              PT_LV + sizeof(low_battery_voltage_threshold)
-#define SIZE_EEPROM         PT_LV + sizeof(low_battery_voltage_threshold) - 1 // PT_CRC d'not count
+#define PT_DNS              PT_PASSW + sizeof(passw)
+#define PT_HOST             PT_DNS + sizeof(mqtt_host_resolving)
+#define PT_PORT             PT_HOST + sizeof(mqtt_host)
+#define PT_MUSER            PT_PORT + sizeof(mqtt_port)
+#define PT_MPASSW           PT_MUSER + sizeof(mqtt_user)
+#define PT_CRC              PT_MPASSW + sizeof(mqtt_passw)
+#define SIZE_EEPROM         PT_MPASSW + sizeof(mqtt_passw) - 1 // PT_CRC d'not count
+// EEPROM data end
 
 WiFiEventHandler on_wifi_connect_handler;
 WiFiEventHandler on_wifi_got_IP_handler;
@@ -91,8 +94,16 @@ void setup() {
     Serial.println(lcd_status);
     HALT
   }
-
+  
+  EEPROM.begin(2048);
   lcd.clear();
+  if ( !eeprom_read() ){
+    lcd.print(F("EEPROM ERROR"));
+    delay(10000);
+    network_enable = false;
+    lcd.clear();
+  }
+
   enable_cli=wait_for_key_pressed(10);
   lcd.clear();
   if ( enable_cli ) {
@@ -154,6 +165,8 @@ void setup_usual_mode(){
     on_wifi_got_IP_handler = WiFi.onStationModeGotIP(on_wifi_got_IP);
     on_wifi_disconnect_handler = WiFi.onStationModeDisconnected(on_wifi_disconnect);
     wifi_init();
+  }else{
+    Serial.println(F("Network disable"));
   }
   delay(2000);
   lcd.clear();
