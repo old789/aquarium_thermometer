@@ -18,6 +18,10 @@ void setup_cli_mode(){
   TERM_CMD->addCmd("port", "[number]", "Set port of a MQTT broker", set_mqtt_port);
   TERM_CMD->addCmd("muser", "[word]", "Set MQTT user", set_mqtt_user);
   TERM_CMD->addCmd("mpassw", "[word]", "Set MQTT pasword", set_mqtt_passw);
+  TERM_CMD->addCmd("t1high", "[float]", "Set high value for correction of 1st sensor", set_t1_raw_high);
+  TERM_CMD->addCmd("t1low", "[float]", "Set low value for correction of 1st sensor", set_t1_raw_low);
+  TERM_CMD->addCmd("t2high", "[float]", "Set high value for correction of 2nd sensor", set_t2_raw_high);
+  TERM_CMD->addCmd("t2low", "[float]", "Set low value for correction of 2nd sensor", set_t2_raw_low);
   TERM_CMD->addCmd("show", "", "Show configuration", show_conf);
   TERM_CMD->addCmd("save", "", "Save configuration to EEPROM", save_conf);
   TERM_CMD->addCmd("reboot", "", "Reboot", reboot);
@@ -38,6 +42,24 @@ void set_string_parameter(Terminal* terminal, char* param, unsigned int param_si
   terminal->println();
   if ( passed ) {
     terminal->println(PASSED, param_name + " set to \"" + String(param) + "\"");
+  } else {
+    terminal->println(FAILED, param_name + " not set");
+  }
+  terminal->prompt();
+}
+  
+void set_float_parameter(Terminal* terminal, float* param, String param_name){
+  bool passed = false;
+  String value = terminal->readParameter();
+  if (value == NULL) {
+    terminal->invalidParameter();
+  } else {
+    *param=value.toFloat();
+    passed = true;
+  }
+  terminal->println();
+  if ( passed ) {
+    terminal->println(PASSED, param_name + " set to \"" + String(*param) + "\"");
   } else {
     terminal->println(FAILED, param_name + " not set");
   }
@@ -147,6 +169,22 @@ void set_mqtt_passw (Terminal* terminal) {
   set_string_parameter( terminal, mqtt_passw, sizeof(mqtt_passw), "MQTT passwoord");
 }
 
+void set_t1_raw_high(Terminal* terminal) {
+  set_float_parameter(terminal, &t1_raw_high, "High value for correction of 1st sensor");
+}
+
+void set_t1_raw_low(Terminal* terminal) {
+  set_float_parameter(terminal, &t1_raw_low, "Low value for correction of 1st sensor");
+}
+
+void set_t2_raw_high(Terminal* terminal) {
+  set_float_parameter(terminal, &t2_raw_high, "High value for correction of 2st sensor");
+}
+
+void set_t2_raw_low(Terminal* terminal) {
+  set_float_parameter(terminal, &t2_raw_low, "Low value for correction of 2st sensor");
+}
+
 void show_conf (Terminal* terminal) {
   if ( network_enable )
     terminal->println(INFO,"Network enabled");
@@ -164,6 +202,18 @@ void show_conf (Terminal* terminal) {
   terminal->println(INFO,"MQTT broker port = \"" + String(mqtt_port) + "\"");
   terminal->println(INFO,"MQTT username = \"" + String(mqtt_user) + "\"");
   terminal->println(INFO,"MQTT password = \"" + String(mqtt_passw) + "\"");
+  if ( t1_corr_enable )
+    terminal->println(INFO,"Correction of 1st sensor enable");
+  else
+    terminal->println(INFO,"Correction of 1st sensor disabled");
+  terminal->println(INFO,"High value for calibration of 1st sensor = " + String(t1_raw_high) + "");
+  terminal->println(INFO,"Low value for calibration of 1st sensor = " + String(t1_raw_low) + "");
+  if ( t2_corr_enable )
+    terminal->println(INFO,"Correction of 2nd sensor enable");
+  else
+    terminal->println(INFO,"Correction of 2nd sensor disabled");
+  terminal->println(INFO,"High value for calibration of 2nd sensor = " + String(t2_raw_high) + "");
+  terminal->println(INFO,"Low value for calibration of 2nd sensor = " + String(t2_raw_low) + "");
   terminal->prompt();
 }
 

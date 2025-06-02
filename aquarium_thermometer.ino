@@ -41,6 +41,8 @@ uint16_t prev_mqtt_port = 1883;
 unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
 char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
+float reference_high = 99.9;   // High reference temperature for calibration of sensor (boiling water) 
+float reference_low = 0;       // Low reference temperature for calibration of sensor (melting ice)
 
 // Config begin
 uint16_t mark = 0x55aa;
@@ -53,6 +55,12 @@ char mqtt_host[33] = {0};     // hostname ( DNS or mDNS mode ) or IP ( DNS only 
 uint16_t mqtt_port = 1883;
 char mqtt_user[33] = {0};     // MQTT authentification parameters
 char mqtt_passw[33] = {0};    // MQTT authentification parameters
+bool t1_corr_enable = false;  // Is enable corection of 1st sensor
+float t1_raw_high = 99.9;     // High value of temperature for calibration of 1st sensor
+float t1_raw_low  = 0;        // Low value of temperature for calibration of 1st sensor
+bool t2_corr_enable = false;  // Is enable corection of 2nd sensor
+float t2_raw_high = 99.9;     // High value of temperature for calibration of 2nd sensor
+float t2_raw_low  = 0;        // Low value of temperature for calibration of 2nd sensor
 //   Config end
 
 // EEPROM data definition
@@ -65,8 +73,14 @@ char mqtt_passw[33] = {0};    // MQTT authentification parameters
 #define PT_PORT             PT_HOST + sizeof(mqtt_host)
 #define PT_MUSER            PT_PORT + sizeof(mqtt_port)
 #define PT_MPASSW           PT_MUSER + sizeof(mqtt_user)
-#define PT_CRC              PT_MPASSW + sizeof(mqtt_passw)
-#define SIZE_EEPROM         PT_MPASSW + sizeof(mqtt_passw) - 1 // PT_CRC d'not count
+#define PT_T1_CORR_ENA      PT_MPASSW + sizeof(mqtt_passw)
+#define PT_T1_RAW_HIGH      PT_T1_CORR_ENA + sizeof(t1_corr_enable)
+#define PT_T1_RAW_LOW       PT_T1_RAW_HIGH + sizeof(t1_raw_high)
+#define PT_T2_CORR_ENA      PT_T1_RAW_LOW + sizeof(t1_raw_low)
+#define PT_T2_RAW_HIGH      PT_T2_CORR_ENA + sizeof(t2_corr_enable)
+#define PT_T2_RAW_LOW       PT_T2_RAW_HIGH + sizeof(t2_raw_high)
+#define PT_CRC              PT_T2_RAW_LOW + sizeof(t2_raw_low)
+#define SIZE_EEPROM         PT_T2_RAW_LOW + sizeof(t2_raw_low) - 1 // PT_CRC d'not count
 // EEPROM data end
 
 WiFiEventHandler on_wifi_connect_handler;

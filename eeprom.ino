@@ -10,6 +10,10 @@ void eeprom_save(){
   EEPROM.put(PT_PORT, mqtt_port);
   EEPROM.put(PT_MUSER, mqtt_user);
   EEPROM.put(PT_MPASSW, mqtt_passw);
+  EEPROM.put(PT_T1_RAW_HIGH, t1_raw_high);
+  EEPROM.put(PT_T1_RAW_LOW, t1_raw_low);
+  EEPROM.put(PT_T2_RAW_HIGH, t2_raw_high);
+  EEPROM.put(PT_T2_RAW_LOW, t2_raw_low);
   EEPROM.put(PT_CRC, ram_crc());
   EEPROM.commit();
 }
@@ -40,6 +44,10 @@ unsigned long ram_crc() {
   memcpy(buf+PT_PORT, &mqtt_port, sizeof(mqtt_port));
   memcpy(buf+PT_MUSER, &mqtt_user, strlen(mqtt_user));
   memcpy(buf+PT_MPASSW, &mqtt_passw, strlen(mqtt_passw));
+  memcpy(buf+PT_T1_RAW_HIGH, &t1_raw_high, sizeof(t1_raw_high));
+  memcpy(buf+PT_T1_RAW_LOW, &t1_raw_low, sizeof(t1_raw_low));
+  memcpy(buf+PT_T2_RAW_HIGH, &t2_raw_high, sizeof(t2_raw_high));
+  memcpy(buf+PT_T2_RAW_LOW, &t2_raw_low, sizeof(t2_raw_low));
 
   for (uint16_t index = 0 ; index <= SIZE_EEPROM  ; ++index) {
     crc = crc_table[(crc ^ buf[index]) & 0x0f] ^ (crc >> 4);
@@ -71,6 +79,10 @@ PGM_P msg2 = PSTR("EEPROM read ERROR: incorrect crc");
   EEPROM.get(PT_PORT, mqtt_port);
   EEPROM.get(PT_MUSER, mqtt_user);
   EEPROM.get(PT_MPASSW, mqtt_passw);
+  EEPROM.get(PT_T1_RAW_HIGH, t1_raw_high);
+  EEPROM.get(PT_T1_RAW_LOW, t1_raw_low);
+  EEPROM.get(PT_T2_RAW_HIGH, t2_raw_high);
+  EEPROM.get(PT_T2_RAW_LOW, t2_raw_low);
   EEPROM.get(PT_CRC, crc);
  
   if ( crc != ram_crc() ){
