@@ -29,7 +29,7 @@ Terminal terminal(&Serial);
 #define UNSUCCESSFUL_ATTEMPTS_COUNT 30
 #define HALT while(true){ delay(100); }
 
-double t1, t2;
+float t1, t2;
 bool enable_cli = false;
 unsigned int roll_cnt=0;
 // char roller[] = { '|', '/', '-', '\\' };
@@ -42,7 +42,8 @@ unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
 char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
 float reference_high = 99.9;   // High reference temperature for calibration of sensor (boiling water) 
-float reference_low = 0;       // Low reference temperature for calibration of sensor (melting ice)
+float reference_low = 0.01;    // Low reference temperature for calibration of sensor (melting ice)
+float reference_range = reference_high - reference_low;
 
 // Config begin
 uint16_t mark = 0x55aa;
@@ -203,6 +204,9 @@ void loop_usual_mode() {
 void read_themperatures(){
   if (ds1.isConversionComplete()){
     t1=ds1.getTempC();
+    if ( t1_corr_enable ) {
+      t1=ds18b20_correction( t1, t1_raw_high, t1_raw_low );
+    }
     lcd.setCursor(0,0);
     lcd.print(F("Aqua t = "));
     lcd.print(t1,1);
@@ -211,6 +215,9 @@ void read_themperatures(){
   }
   if (ds2.isConversionComplete()){
     t2=ds2.getTempC();
+    if ( t2_corr_enable ) {
+      t2=ds18b20_correction( t2, t2_raw_high, t2_raw_low );
+    }
     lcd.setCursor(0,1);
     lcd.print(F("Room t = "));
     lcd.print(t2,1);
@@ -269,3 +276,7 @@ bool wait_for_key_pressed( uint8_t tries ) {
   return(false);
 }
 
+float ds18b20_correction( float t, float raw_high, float raw_low ) {
+  float raw_range = raw_high - raw_low; 
+  return( ( ( (t - raw_low) * reference_range ) / raw_range ) + reference_low );
+}

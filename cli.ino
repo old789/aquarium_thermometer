@@ -18,8 +18,10 @@ void setup_cli_mode(){
   TERM_CMD->addCmd("port", "[number]", "Set port of a MQTT broker", set_mqtt_port);
   TERM_CMD->addCmd("muser", "[word]", "Set MQTT user", set_mqtt_user);
   TERM_CMD->addCmd("mpassw", "[word]", "Set MQTT pasword", set_mqtt_passw);
+  TERM_CMD->addCmd("t1corr", "[0/1]", "Correction of 1st sensor enable(1)/disable(0)", set_t1_corr);
   TERM_CMD->addCmd("t1high", "[float]", "Set high value for correction of 1st sensor", set_t1_raw_high);
   TERM_CMD->addCmd("t1low", "[float]", "Set low value for correction of 1st sensor", set_t1_raw_low);
+  TERM_CMD->addCmd("t2corr", "[0/1]", "Correction of 2nd sensor enable(1)/disable(0)", set_t2_corr);
   TERM_CMD->addCmd("t2high", "[float]", "Set high value for correction of 2nd sensor", set_t2_raw_high);
   TERM_CMD->addCmd("t2low", "[float]", "Set low value for correction of 2nd sensor", set_t2_raw_low);
   TERM_CMD->addCmd("show", "", "Show configuration", show_conf);
@@ -66,12 +68,7 @@ void set_float_parameter(Terminal* terminal, float* param, String param_name){
   terminal->prompt();
 }
   
-
-void set_name(Terminal* terminal) {
-  set_string_parameter( terminal, dev_name, sizeof(dev_name), "Device name");
-}
-
-void set_network_mode (Terminal* terminal) {
+void set_bool_parameter(Terminal* terminal, bool* param, String param_name) {
   bool passed = false;
   int i;
   String value = terminal->readParameter();
@@ -80,23 +77,40 @@ void set_network_mode (Terminal* terminal) {
   } else {
     i = value.toInt();
     if ( i == 0 or i == 1) {
-      network_enable = (bool)i; 
+      *param = (bool)i; 
       passed = true;
     } else {
-      terminal->println(ERROR, "Parameter " + value + " is not between 0 or 1!");
+      terminal->println(ERROR, "Parameter " + value + " is not 0 or 1!");
     }
   }
   terminal->println();
   if ( passed ) {
-    if (network_enable) {
-      terminal->println(PASSED, "Network mode enabled");
+    if ( *param ) {
+      terminal->println(PASSED, param_name + " enabled");
     } else {
-      terminal->println(PASSED, "Network mode disabled");
+      terminal->println(PASSED, param_name + " disabled");
     }
   } else {
-    terminal->println(FAILED, "Network mode unchanged");
+    terminal->println(FAILED, param_name + " unchanged");
   }
   terminal->prompt();
+}
+
+
+void set_name(Terminal* terminal) {
+  set_string_parameter( terminal, dev_name, sizeof(dev_name), "Device name");
+}
+
+void set_network_mode (Terminal* terminal) {
+  set_bool_parameter( terminal, &network_enable, "Network mode");
+}
+
+void set_t1_corr (Terminal* terminal) {
+  set_bool_parameter( terminal, &t1_corr_enable, "Correction of 1st sensor");
+}
+
+void set_t2_corr (Terminal* terminal) {
+  set_bool_parameter( terminal, &t2_corr_enable, "Correction of 2st sensor");
 }
 
 void set_ssid (Terminal* terminal) {
