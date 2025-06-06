@@ -41,7 +41,7 @@ uint16_t prev_mqtt_port = 1883;
 unsigned int unsucessfull_attempt = 0;
 bool first_message_after_boot = true;
 char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
-float reference_high = 99.9;   // High reference temperature for calibration of sensor (boiling water) 
+float reference_high = 99.99;   // High reference temperature for calibration of sensor (boiling water) 
 float reference_low = 0.01;    // Low reference temperature for calibration of sensor (melting ice)
 float reference_range = reference_high - reference_low;
 
