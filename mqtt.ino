@@ -38,20 +38,23 @@ bool mqtt_publish(){
     return(false);
   }
   if ( first_message_after_boot ) {
-    if (!client.publish("t18b2/system_events", "aquarium thermometer booted")) {
-      Serial.println(F("Error publishing to system_events"));
+    if (!client.publish(topic0, "aquarium thermometer booted")) {
+      Serial.print(F("Error publishing to "));
+      Serial.println(topic0);
         return(false);
     }
     first_message_after_boot = false;
   }
   dtostrf(t1,1,1,t1_str);
-  if (!client.publish("t18b2/aquarium/temp/water", t1_str)) {
-    Serial.println(F("Error publishing to t18b2/aquarium/temp/water"));
+  if (!client.publish(topic1, t1_str)) {
+    Serial.print(F("Error publishing to "));
+    Serial.println(topic1);
     return(false);
   }
   dtostrf(t2,1,1,t2_str);
-  if (!client.publish("t18b2/aquarium/temp/ambient", t2_str)) {
-    Serial.println(F("Error publishing to t18b2/aquarium/temp/ambient"));
+  if (!client.publish(topic2, t2_str)) {
+    Serial.print(F("Error publishing to "));
+    Serial.println(topic2);
     return(false);
   }
   client.disconnect();

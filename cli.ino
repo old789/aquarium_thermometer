@@ -18,6 +18,7 @@ void setup_cli_mode(){
   TERM_CMD->addCmd("port", "[number]", "Set port of a MQTT broker", set_mqtt_port);
   TERM_CMD->addCmd("muser", "[word]", "Set MQTT user", set_mqtt_user);
   TERM_CMD->addCmd("mpassw", "[word]", "Set MQTT pasword", set_mqtt_passw);
+  TERM_CMD->addCmd("prefix", "[word]", "Set MQTT topic starting prefix", set_mqtt_prefix);
   TERM_CMD->addCmd("t1corr", "[0/1]", "Correction of 1st sensor enable(1)/disable(0)", set_t1_corr);
   TERM_CMD->addCmd("t1high", "[float]", "Set high value for correction of 1st sensor", set_t1_raw_high);
   TERM_CMD->addCmd("t1low", "[float]", "Set low value for correction of 1st sensor", set_t1_raw_low);
@@ -183,6 +184,10 @@ void set_mqtt_passw (Terminal* terminal) {
   set_string_parameter( terminal, mqtt_passw, sizeof(mqtt_passw), "MQTT passwoord");
 }
 
+void set_mqtt_prefix (Terminal* terminal) {
+  set_string_parameter( terminal, mqtt_prefix, sizeof(mqtt_prefix), "MQTT prefix");
+}
+
 void set_t1_raw_high(Terminal* terminal) {
   set_float_parameter(terminal, &t1_raw_high, "High value for correction of 1st sensor");
 }
@@ -216,6 +221,7 @@ void show_conf (Terminal* terminal) {
   terminal->println(INFO,"MQTT broker port = \"" + String(mqtt_port) + "\"");
   terminal->println(INFO,"MQTT username = \"" + String(mqtt_user) + "\"");
   terminal->println(INFO,"MQTT password = \"" + String(mqtt_passw) + "\"");
+  terminal->println(INFO,"MQTT prefix = \"" + String(mqtt_prefix) + "\"");
   if ( t1_corr_enable )
     terminal->println(INFO,"Correction of 1st sensor enable");
   else

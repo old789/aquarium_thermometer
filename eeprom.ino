@@ -10,6 +10,7 @@ void eeprom_save(){
   EEPROM.put(PT_PORT, mqtt_port);
   EEPROM.put(PT_MUSER, mqtt_user);
   EEPROM.put(PT_MPASSW, mqtt_passw);
+  EEPROM.put(PT_MPREF, mqtt_prefix);
   EEPROM.put(PT_T1_CORR_ENA, t1_corr_enable);
   EEPROM.put(PT_T1_RAW_HIGH, t1_raw_high);
   EEPROM.put(PT_T1_RAW_LOW, t1_raw_low);
@@ -46,6 +47,7 @@ unsigned long ram_crc() {
   memcpy(buf+PT_PORT, &mqtt_port, sizeof(mqtt_port));
   memcpy(buf+PT_MUSER, &mqtt_user, strlen(mqtt_user));
   memcpy(buf+PT_MPASSW, &mqtt_passw, strlen(mqtt_passw));
+  memcpy(buf+PT_MPREF, &mqtt_prefix, strlen(mqtt_prefix));
   memcpy(buf+PT_T1_CORR_ENA, &t1_corr_enable, sizeof(t1_corr_enable));
   memcpy(buf+PT_T1_RAW_HIGH, &t1_raw_high, sizeof(t1_raw_high));
   memcpy(buf+PT_T1_RAW_LOW, &t1_raw_low, sizeof(t1_raw_low));
@@ -83,6 +85,7 @@ PGM_P msg2 = PSTR("EEPROM read ERROR: incorrect crc");
   EEPROM.get(PT_PORT, mqtt_port);
   EEPROM.get(PT_MUSER, mqtt_user);
   EEPROM.get(PT_MPASSW, mqtt_passw);
+  EEPROM.get(PT_MPREF, mqtt_prefix);
   EEPROM.get(PT_T1_CORR_ENA, t1_corr_enable);
   EEPROM.get(PT_T1_RAW_HIGH, t1_raw_high);
   EEPROM.get(PT_T1_RAW_LOW, t1_raw_low);

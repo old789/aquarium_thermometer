@@ -44,6 +44,9 @@ char dev_model[33] = "2ch thermometre for an aquarium"; // Model of device
 float reference_high = 99.99;   // High reference temperature for calibration of sensor (boiling water) 
 float reference_low = 0.01;    // Low reference temperature for calibration of sensor (melting ice)
 float reference_range = reference_high - reference_low;
+char topic0[128] = {0};
+char topic1[128] = {0};
+char topic2[128] = {0};
 
 // Config begin
 uint16_t mark = 0x55aa;
@@ -56,6 +59,7 @@ char mqtt_host[33] = {0};     // hostname ( DNS or mDNS mode ) or IP ( DNS only 
 uint16_t mqtt_port = 1883;
 char mqtt_user[33] = {0};     // MQTT authentification parameters
 char mqtt_passw[33] = {0};    // MQTT authentification parameters
+char mqtt_prefix[33] ={0};    // MQTT topic beginning
 bool t1_corr_enable = false;  // Is enable corection of 1st sensor
 float t1_raw_high = 99.9;     // High value of temperature for calibration of 1st sensor
 float t1_raw_low  = 0;        // Low value of temperature for calibration of 1st sensor
@@ -74,7 +78,8 @@ float t2_raw_low  = 0;        // Low value of temperature for calibration of 2nd
 #define PT_PORT             PT_HOST + sizeof(mqtt_host)
 #define PT_MUSER            PT_PORT + sizeof(mqtt_port)
 #define PT_MPASSW           PT_MUSER + sizeof(mqtt_user)
-#define PT_T1_CORR_ENA      PT_MPASSW + sizeof(mqtt_passw)
+#define PT_MPREF            PT_MPASSW + sizeof(mqtt_passw)
+#define PT_T1_CORR_ENA      PT_MPREF + sizeof(mqtt_prefix)
 #define PT_T1_RAW_HIGH      PT_T1_CORR_ENA + sizeof(t1_corr_enable)
 #define PT_T1_RAW_LOW       PT_T1_RAW_HIGH + sizeof(t1_raw_high)
 #define PT_T2_CORR_ENA      PT_T1_RAW_LOW + sizeof(t1_raw_low)
@@ -183,6 +188,9 @@ void setup_usual_mode(){
   }else{
     Serial.println(F("Network disable"));
   }
+  sprintf(topic0, "%s/system_events", mqtt_prefix);
+  sprintf(topic1, "%s/aquarium/temp/water", mqtt_prefix);
+  sprintf(topic2, "%s/aquarium/temp/ambient", mqtt_prefix);
   delay(2000);
   lcd.clear();
   read_themperatures();
